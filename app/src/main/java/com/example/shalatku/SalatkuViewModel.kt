@@ -1,49 +1,51 @@
 package com.example.shalatku
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-
-private const val ROUND_SIZE = 33
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class SalatKuViewModel : ViewModel() {
 
-    var tasbihCount by mutableIntStateOf(0)
-        private set
+    private val _uiState = MutableStateFlow(SalatKuUiState())
+    val uiState: StateFlow<SalatKuUiState> = _uiState.asStateFlow()
 
-    var completedRounds by mutableIntStateOf(0)
-        private set
+    fun togglePrayer(name: String) {
+        _uiState.update { state ->
+            val done = if (name in state.donePrayers) {
+                state.donePrayers - name
+            } else {
+                state.donePrayers + name
+            }
+            state.copy(donePrayers = done)
+        }
+    }
 
-    private val _donePrayers = mutableStateListOf<String>()
-    val donePrayers: List<String> get() = _donePrayers
+    fun clearPrayers() {
+        _uiState.update { it.copy(donePrayers = emptyList()) }
+    }
 
-    var selectedDay by mutableIntStateOf(0)
-        private set
+    fun selectDay(index: Int) {
+        _uiState.update { it.copy(selectedDay = index) }
+    }
 
     fun incrementTasbih() {
-        tasbihCount++
-        if (tasbihCount == ROUND_SIZE) {
-            completedRounds++
-            tasbihCount = 0
+        _uiState.update { state ->
+            val next = state.tasbihCount + 1
+            if (next == state.roundSize) {
+                state.copy(tasbihCount = 0, completedRounds = state.completedRounds + 1)
+            } else {
+                state.copy(tasbihCount = next)
+            }
         }
     }
 
     fun resetTasbih() {
-        tasbihCount = 0
-        completedRounds = 0
+        _uiState.update { it.copy(tasbihCount = 0, completedRounds = 0) }
     }
 
-    fun togglePrayer(name: String) {
-        if (name in _donePrayers) _donePrayers.remove(name) else _donePrayers.add(name)
-    }
-
-    fun selectDay(index: Int) {
-        selectedDay = index
-    }
-
-    fun clearPrayers() {
-        _donePrayers.clear()
+    fun setRoundSize(size: Int) {
+        _uiState.update { it.copy(roundSize = size, tasbihCount = 0) }
     }
 }

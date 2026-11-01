@@ -2,10 +2,12 @@ package com.example.shalatku
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -19,8 +21,10 @@ import androidx.compose.ui.unit.dp
 fun TasbihScreen(
     count: Int,
     rounds: Int,
+    roundSize: Int,
     onIncrement: () -> Unit,
     onReset: () -> Unit,
+    onSelectRoundSize: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -32,10 +36,22 @@ fun TasbihScreen(
         Spacer(Modifier.height(8.dp))
         Text("Rounds: $rounds", style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(16.dp))
-        Text("$count", style = MaterialTheme.typography.displayLarge)
+        Text("$count / $roundSize", style = MaterialTheme.typography.displayLarge)
         Spacer(Modifier.height(24.dp))
         Button(onClick = onIncrement) { Text("+1") }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(onClick = onReset) { Text("Reset") }
+        Spacer(Modifier.height(16.dp))
+        Row(horizontalArrangement = Arrangement.Center) {
+            listOf(33, 99, 100).forEach { size ->
+                OutlinedButton(
+                    onClick = { onSelectRoundSize(size) },
+                    enabled = roundSize != size
+                ) {
+                    Text("$size")
+                }
+                Spacer(Modifier.width(8.dp))
+            }
+        }
     }
 }
